@@ -3,7 +3,7 @@ export default class Phi {
 	constructor(container) {
 
     this.container = container
-    this.canvas = this.container.querySelector('canvas')
+    this.canvas = this.$('canvas')
     this.ctx = this.canvas.getContext('2d')
 
     this.phiBuffer = document.createElement('canvas')
@@ -28,14 +28,23 @@ export default class Phi {
     this.container.addEventListener('drop', this.handleDrop.bind(this))
 
     // Sauvegarde de l'image
-    this.container.querySelector('.save-canvas').addEventListener('click', (event) => {
+    this.$('.save-canvas').addEventListener('click', (event) => {
       event.target.href = this.canvas.toDataURL();
-      event.target.download = '';
+      event.target.download = this.filename;
+    })
+    
+    // Sauvegarde de l'image
+    this.$('input[name="picture-select"]').addEventListener('change', (event) => {
+      this.getNewPicture(event.target.files)
     })
     
     // Calcul de la taille du canvas
     this.updateCanvasSize()
 	}
+
+  $(selector) {
+    return this.container.querySelector(selector)
+  }
 
   get width() {
     return this._width
@@ -54,28 +63,28 @@ export default class Phi {
   }
 
   get phiColor () {
-    return this.container.querySelector('input[type="color"][name="phi"]').value
+    return this.$('input[type="color"][name="phi"]').value
   }
   
   get phiAlpha () {
-    return +this.container.querySelector('input[type="range"][name="phiAlpha"]').value / 100
+    return +this.$('input[type="range"][name="phiAlpha"]').value / 100
   }
   
   get phiSize () {
-    return +this.container.querySelector('input[type="range"][name="phiSize"]').value / 100
+    return +this.$('input[type="range"][name="phiSize"]').value / 100
   }
   
   get phiAlign () {
-    var select = this.container.querySelector('select[name="phiAlign"]')
+    var select = this.$('select[name="phiAlign"]')
     return select.options[select.selectedIndex].value
   }
   
   get backgroundColor () {
-    return this.container.querySelector('input[type="color"][name="background"]').value
+    return this.$('input[type="color"][name="background"]').value
   }
   
   get backgroundColorEnabled () {
-    return this.container.querySelector('input[type="checkbox"][name="backgroundColorEnabled"]').checked
+    return this.$('input[type="checkbox"][name="backgroundColorEnabled"]').checked
   }
   
   /**
@@ -195,8 +204,13 @@ export default class Phi {
     event.stopPropagation()
     event.preventDefault()
 
-    const files = event.dataTransfer.files
-    
+    this.getNewPicture(event.dataTransfer.files)
+  }
+  
+  /**
+   * Récupère l'image depuis le drop ou la sélection de fichier
+   */
+   getNewPicture(files) {
     for (let file of files) {
       if (file.type.match('image.*')) {
         const reader = new FileReader()

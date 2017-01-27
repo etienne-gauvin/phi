@@ -14,6 +14,14 @@ canvas {
   width: 100%;
 }
 
+label.picture-select {
+  margin: 0.4em 0;
+}
+
+label.picture-select input {
+  display: none;
+}
+
 form, form input {
   text-align: right;
   font-size: large;
@@ -60,12 +68,21 @@ footer a:active {
 	text-decoration: underline;
 }
 
-.save-canvas {
+.save-canvas,
+.picture-select {
   text-decoration: none;
-  background-color: #C94E34;
-  color: white;
+  background-color: #C86651;
+  color: #EEE;
   /*font-size: 1.2em;*/
   padding: 0.4em 0.2em;
   display: block;
   cursor: pointer;
+}
+
+.save-canvas:hover,
+.save-canvas:focus,
+.picture-select:hover,
+.picture-select:focus {
+  background-color: #C94E34;
+  color: white;
 }
