@@ -1,4 +1,4 @@
-class Phi {
+export default class Phi {
 	
 	constructor(container) {
 
@@ -14,11 +14,11 @@ class Phi {
     
     // Image du phi
     this.phi = new Image
-    this.phi.src = 'phi.svg'
+    this.phi.src = './images/phi.svg'
     
     // Photo par défaut
     this.picture = new Image
-    this.picture.src = 'faites-glisser.svg'
+    this.picture.src = './images/faites-glisser.svg'
     this.picture.addEventListener('load', () => {
       this.updateCanvasSize()
     })
@@ -26,6 +26,12 @@ class Phi {
     // Gestion du drag n drop
     this.container.addEventListener('dragover', this.handleDragOver.bind(this))
     this.container.addEventListener('drop', this.handleDrop.bind(this))
+
+    // Sauvegarde de l'image
+    this.container.querySelector('.save-canvas').addEventListener('click', (event) => {
+      event.target.href = this.canvas.toDataURL();
+      event.target.download = '';
+    })
     
     // Calcul de la taille du canvas
     this.updateCanvasSize()
@@ -51,8 +57,16 @@ class Phi {
     return this.container.querySelector('input[type="color"][name="phi"]').value
   }
   
+  get phiAlpha () {
+    return +this.container.querySelector('input[type="range"][name="phiAlpha"]').value / 100
+  }
+  
   get backgroundColor () {
     return this.container.querySelector('input[type="color"][name="background"]').value
+  }
+  
+  get backgroundColorEnabled () {
+    return this.container.querySelector('input[type="checkbox"][name="backgroundColorEnabled"]').checked
   }
   
   /**
@@ -95,24 +109,31 @@ class Phi {
     this.picBufferCtx.clearRect(0, 0, this.width, this.height)
     this.picBufferCtx.drawImage(this.picture, sx, sy, sw, sh, dx, dy, dw, dh)
 
-    // Réduire le contraste
-    this.picBufferCtx.globalAlpha = 0.3
-    this.picBufferCtx.globalCompositeOperation = 'luminosity'
-    this.picBufferCtx.fillStyle = 'gray'
-    this.picBufferCtx.fillRect(0, 0, this.width, this.height)
+    if (this.backgroundColorEnabled) {
 
-    // Colorer la photo
-    this.picBufferCtx.globalAlpha = 1.0
-    this.picBufferCtx.globalCompositeOperation = 'color'
-    this.picBufferCtx.fillStyle = this.backgroundColor
-    this.picBufferCtx.fillRect(0, 0, this.width, this.height)
-    this.picBufferCtx.restore()
+      // Réduire le contraste
+      this.picBufferCtx.globalAlpha = 0.3
+      this.picBufferCtx.globalCompositeOperation = 'luminosity'
+      this.picBufferCtx.fillStyle = 'gray'
+      this.picBufferCtx.fillRect(0, 0, this.width, this.height)
+
+      // Colorer la photo
+      this.picBufferCtx.globalAlpha = 1.0
+      this.picBufferCtx.globalCompositeOperation = 'color'
+      this.picBufferCtx.fillStyle = this.backgroundColor
+      this.picBufferCtx.fillRect(0, 0, this.width, this.height)
+      this.picBufferCtx.globalAlpha = 0.3
+      this.picBufferCtx.globalCompositeOperation = 'luminosity'
+      this.picBufferCtx.fillRect(0, 0, this.width, this.height)
+      this.picBufferCtx.restore()
+      
+    }
 
     // Afficher le tout
     this.ctx.save()
     this.ctx.clearRect(0, 0, this.width, this.height)
     this.ctx.drawImage(this.picBuffer, 0, 0, this.width, this.height)
-    this.ctx.globalAlpha = 0.9
+    this.ctx.globalAlpha = this.phiAlpha
     this.ctx.drawImage(this.phiBuffer, 0, 0, this.width, this.height)
     this.ctx.restore()
     
@@ -151,22 +172,22 @@ class Phi {
 
     const files = event.dataTransfer.files
     
-    for (let i = 0, f; f = files[i]; i++) {
-      
-      if (!f.type.match('image.*')) {
-        continue
-      }
+    for (let file of files) {
+      if (file.type.match('image.*')) {
+        const reader = new FileReader()
 
-      const reader = new FileReader()
-      
-      reader.addEventListener('load', (event) => {
-        this.picture = new Image
-        this.picture.src = event.target.result
-        this.updateCanvasSize()
-      })
-      
-      reader.readAsDataURL(f)
-      break
+        console.log(file)
+        this.filename = file.name
+        
+        reader.addEventListener('load', (event) => {
+          this.picture = new Image
+          this.picture.src = event.target.result
+          this.updateCanvasSize()
+        })
+        
+        reader.readAsDataURL(file)
+        break
+      }
     }
   }
 }

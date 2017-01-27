@@ -1,75 +1,20 @@
 <!DOCTYPE html>
 <html lang="fr">
   <head>
-    <meta charset="UTF-8">
+    <meta charset="UTF-8" />
+
+    <meta property="og:url"                content="http://etienne.gauvin.info/phi/index.html" />
+    <meta property="og:type"               content="website" />
+    <meta property="og:title"              content="φ – Photo de profil insoumise" />
+    <meta property="og:description"        content="Ajoutez un phi φ facilement à votre photo de profil" />
+    <meta property="og:image"              content="http://etienne.gauvin.info/phi/preview.png" />
     
-	<meta property="og:url"                content="http://etienne.gauvin.info/phi/index.html" />
-	<meta property="og:type"               content="website" />
-	<meta property="og:title"              content="φ – Photo de profil insoumise" />
-	<meta property="og:description"        content="Ajoutez un phi φ facilement à votre photo de profil" />
-	<meta property="og:image"              content="http://etienne.gauvin.info/phi/preview.png" />
-	
     <title>φ – Photo de profil insoumise</title>
 
-    <link href="https://fonts.googleapis.com/css?family=Montserrat" rel="stylesheet">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link href="./style.css" rel="stylesheet" />
 
-    <style>
-      body {
-        text-align: center;
-        background-color: white;
-        font-size: large;
-        font-family: 'Montserrat', sans-serif;
-      }
-
-      main {
-        margin: auto;
-        max-width: 24rem;
-      }
-      
-      canvas {
-        width: 100%;
-      }
-      
-      form, form input {
-        text-align: right;
-        font-size: large;
-        line-height: 1.5em;
-      }
-
-      label {
-        display: block;
-      }
-      
-      form label, form input {
-      	background-color: transparent;
-        border: 0;
-        border-radius: 2px;
-      }
-      
-      form label:hover,
-      form label:focus {
-      	background-color: rgba(0, 0, 0, 0.1);
-      }
-      
-      footer {
-      	font-size: small;
-      	color: rgba(0, 0, 0, 0.33);
-      }
-      
-      footer a {
-      	color: inherit;
-      	text-decoration: none;
-      }
-      
-      footer a:hover,
-      footer a:focus,
-      footer a:active {
-      	color: black;
-      	text-decoration: underline;
-      }
-      
-      
-    </style>
+    <link href="https://fonts.googleapis.com/css?family=Montserrat" rel="stylesheet" />
   </head>
   <body>
     <main>
@@ -78,39 +23,44 @@
         Ajoutez facilement le symbole de la France insoumise sur votre photo de profil&nbsp;!
         Pour cela, faites la glisser sur le Phi ci-dessous.
       </p>
-      <p>Pour sauvegarder votre nouvelle image de profil, maintenez votre doigt ou faites un clic droit sur celle-ci, puis ‟Enregistrer l'image sous…”</p>
 
       <canvas class="phi">
         Votre navigateur est obsolète.
       </canvas>
 
       <form>
-        <label>
-          Couleur du symbole φ (phi)&nbsp;: 
-          <input type="color" name="phi" value="#C94E34" />
-        </label>
-        <label>
-          Couleur de l'image&nbsp;: 
-          <input type="color" name="background" value="#00B6CD" />
-        </label>
+        <div>
+          <label>
+            Couleur du symbole φ&nbsp;: 
+            <input type="color" name="phi" value="#C94E34" />
+          </label>
+        </div>
+        <div>
+          <label>
+            Opacité du symbole φ&nbsp;: 
+            <input type="range" min="20" max="100" step="1" name="phiAlpha" value="80" />
+          </label>
+        </div>
+        <div>
+          <label class="secondary">
+            <input type="checkbox" name="backgroundColorEnabled" checked />
+          </label>
+          <label>
+            Coloriser la photo&nbsp;: 
+            <input type="color" name="background" value="#00B6CD" />
+          </label>
+        </div>
       </form>
+
+      <a class="save-canvas">Enregistrer l'image</a>
     </main>
     
     <footer>
-      <p>Votre photo n'est ni sauvegardée, ni transmise sur le serveur.</p>
+      <p>Votre photo n'est à aucun moment transmise sur le serveur.</p>
       <p><a href="https://twitter.com/etngv">etngv</a></p>
       <p><a href="http://github.com/etienne-gauvin/phi">Voir le code-source</a></p>
     </footer>
     
-    <script src="phi.js"></script>
-    
-    <script>
-      (function(){
-        
-        const phi = new Phi(document.querySelector('main'))
-        phi.draw()
-        
-      })()
-    </script>
+    <script src="app.js"></script>
   </body>
 </html>
