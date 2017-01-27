@@ -61,6 +61,15 @@ export default class Phi {
     return +this.container.querySelector('input[type="range"][name="phiAlpha"]').value / 100
   }
   
+  get phiSize () {
+    return +this.container.querySelector('input[type="range"][name="phiSize"]').value / 100
+  }
+  
+  get phiAlign () {
+    var select = this.container.querySelector('select[name="phiAlign"]')
+    return select.options[select.selectedIndex].value
+  }
+  
   get backgroundColor () {
     return this.container.querySelector('input[type="color"][name="background"]').value
   }
@@ -94,11 +103,27 @@ export default class Phi {
       sw = sh * (dw / dh)
       sx = this.picture.width / 2 - sw / 2
     }
+
+    const size = this.phiSize
+    const align = this.phiAlign
+    let x = 0, y = 0
+
+    if (align === 'center') {
+      x = this.width  * (1 - size) / 2
+      y = this.height * (1 - size) / 2
+    }
+    else {
+      if (align.match(/^bottom-/))
+        y = this.height * (1 - size)
+
+      if (align.match(/-right$/))
+        x = this.width * (1 - size)
+    }
     
     // Coloration du phi
     this.phiBufferCtx.save()
     this.phiBufferCtx.clearRect(0, 0, this.width, this.height)
-    this.phiBufferCtx.drawImage(this.phi, 0, 0, this.width, this.height)
+    this.phiBufferCtx.drawImage(this.phi, x, y, this.width * size, this.height * size)
     this.phiBufferCtx.globalCompositeOperation = 'source-in'
     this.phiBufferCtx.fillStyle = this.phiColor
     this.phiBufferCtx.fillRect(0, 0, this.width, this.height)
