@@ -886,7 +886,7 @@ var Phi = function () {
       this.ctx.drawImage(this.phiBuffer, 0, 0, this.width, this.height);
       this.ctx.restore();
 
-      //requestAnimationFrame(this.draw.bind(this))
+      requestAnimationFrame(this.draw.bind(this));
     }
 
     /**
