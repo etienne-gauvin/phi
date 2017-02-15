@@ -57,8 +57,13 @@ export default class Phi {
 
     // Sauvegarde de l'image
     this.$('.save-canvas').addEventListener('click', (event) => {
-      event.target.href = this.canvas.toDataURL();
-      event.target.download = this.filename;
+      event.target.href = this.canvas.toDataURL()
+      event.target.download = this.filename
+    })
+    
+    // Affichage de l'image (méthode alternative)
+    this.$('.alt-save-canvas').addEventListener('click', (event) => {
+      window.open(this.canvas.toDataURL(), this.filename, 'menubar=no,toolbar=no,location=no')
     })
     
     // Sauvegarde de l'image

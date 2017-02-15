@@ -818,6 +818,11 @@ var Phi = function () {
       event.target.download = _this.filename;
     });
 
+    // Affichage de l'image (méthode alternative)
+    this.$('.alt-save-canvas').addEventListener('click', function (event) {
+      window.open(_this.canvas.toDataURL(), _this.filename, 'menubar=no,toolbar=no,location=no');
+    });
+
     // Sauvegarde de l'image
     this.$('input[name="picture-select"]').addEventListener('change', function (event) {
       _this.getNewPicture(event.target.files);

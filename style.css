@@ -69,6 +69,7 @@ footer a:active {
 }
 
 .save-canvas,
+.alt-save-canvas,
 .picture-select {
   text-decoration: none;
   background-color: #C86651;
@@ -79,10 +80,21 @@ footer a:active {
   cursor: pointer;
 }
 
+.alt-save-canvas {
+  font-size: small;
+  background-color: #E7E7E7;
+  color: #777777;
+}
+
 .save-canvas:hover,
 .save-canvas:focus,
 .picture-select:hover,
 .picture-select:focus {
   background-color: #C94E34;
   color: white;
+}
+.alt-save-canvas:hover,
+.alt-save-canvas:focus {
+  background-color: #DADADA;
+  color: #484848;
 }
