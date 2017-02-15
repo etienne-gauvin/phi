@@ -22,18 +22,23 @@ export default class Phi {
     this.$backgroundColorEnabled = this.$('input[type="checkbox"][name="backgroundColorEnabled"]')
 
     // Écouteurs
-    const elements = [
-      this.$phiColor,
-      this.$phiSize,
-      this.$phiAlpha,
-      this.$phiAlign,
-      this.$phiOperation,
-      this.$backgroundColor,
-      this.$backgroundColorEnabled
-    ]
+    const elements = {
+      phi: [
+        this.$phiColor,
+        this.$phiSize,
+        this.$phiAlign
+      ],
+      pic: [
+        this.$backgroundColor,
+        this.$backgroundColorEnabled
+      ]
+    }
 
-    for (let element of elements)
-      element.addEventListener('change', this.draw.bind(this))
+    for (let element of elements.phi)
+      element.addEventListener('change', () => this.phiChanged = true)
+    
+    for (let element of elements.pic)
+      element.addEventListener('change', () => this.picChanged = true)
     
     // Image du phi
     this.phi = new Image
@@ -119,76 +124,89 @@ export default class Phi {
    * Dessiner l'image
    */
   draw(timestamp) {
-    
-    // Calculs nécessaires pour l'affichage
-    // de la photo en mode "remplissage"
-    const dx = 0
-    const dy = 0
-    const dw = this.width
-    const dh = this.height
-    const ratio = dw / dh
-    
-    let sx = 0, sy = 0
-    let sw = this.picture.width
-    let sh = this.picture.height
-    
-    if (this.picture.width < this.picture.height) {
-      sh = sw * (dh / dw)
-      sy = this.picture.height / 2 - sh / 2
-    }
-    else {
-      sw = sh * (dw / dh)
-      sx = this.picture.width / 2 - sw / 2
-    }
 
-    const size = this.phiSize
-    const align = this.phiAlign
-    let x = 0, y = 0
-
-    if (align === 'center') {
-      x = this.width  * (1 - size) / 2
-      y = this.height * (1 - size) / 2
-    }
-    else {
-      if (align.match(/^bottom-/))
-        y = this.height * (1 - size)
-
-      if (align.match(/-right$/))
-        x = this.width * (1 - size)
+    if (this.phiSize !== this.cachedPhiSize) {
+      this.phiChanged = true
+      this.cachedPhiSize = this.phiSize
     }
     
-    // Coloration du phi
-    this.phiBufferCtx.save()
-    this.phiBufferCtx.clearRect(0, 0, this.width, this.height)
-    this.phiBufferCtx.drawImage(this.phi, x, y, this.width * size, this.height * size)
-    this.phiBufferCtx.globalCompositeOperation = 'source-in'
-    this.phiBufferCtx.fillStyle = this.phiColor
-    this.phiBufferCtx.fillRect(0, 0, this.width, this.height)
-    this.phiBufferCtx.restore()
+    if (this.phiChanged) {
+      this.phiChanged = false
 
-    // Photo
-    this.picBufferCtx.save()
-    this.picBufferCtx.clearRect(0, 0, this.width, this.height)
-    this.picBufferCtx.drawImage(this.picture, sx, sy, sw, sh, dx, dy, dw, dh)
+      // Taille et position du phi
+      const size = this.phiSize
+      const align = this.phiAlign
+      let x = 0, y = 0
 
-    if (this.backgroundColorEnabled) {
+      if (align === 'center') {
+        x = this.width  * (1 - size) / 2
+        y = this.height * (1 - size) / 2
+      }
+      else {
+        if (align.match(/^bottom-/))
+          y = this.height * (1 - size)
 
-      // Réduire le contraste
-      this.picBufferCtx.globalAlpha = 0.3
-      this.picBufferCtx.globalCompositeOperation = 'luminosity'
-      this.picBufferCtx.fillStyle = 'gray'
-      this.picBufferCtx.fillRect(0, 0, this.width, this.height)
+        if (align.match(/-right$/))
+          x = this.width * (1 - size)
+      }
+    
+      // Coloration du phi
+      this.phiBufferCtx.save()
+      this.phiBufferCtx.clearRect(0, 0, this.width, this.height)
+      this.phiBufferCtx.drawImage(this.phi, x, y, this.width * size, this.height * size)
+      this.phiBufferCtx.globalCompositeOperation = 'source-in'
+      this.phiBufferCtx.fillStyle = this.phiColor
+      this.phiBufferCtx.fillRect(0, 0, this.width, this.height)
+      this.phiBufferCtx.restore()
+    }
 
-      // Colorer la photo
-      this.picBufferCtx.globalAlpha = 1.0
-      this.picBufferCtx.globalCompositeOperation = 'color'
-      this.picBufferCtx.fillStyle = this.backgroundColor
-      this.picBufferCtx.fillRect(0, 0, this.width, this.height)
-      this.picBufferCtx.globalAlpha = 0.3
-      this.picBufferCtx.globalCompositeOperation = 'luminosity'
-      this.picBufferCtx.fillRect(0, 0, this.width, this.height)
-      this.picBufferCtx.restore()
+    if (this.picChanged) {
+      this.picChanged = false
+
+      // Calculs nécessaires pour l'affichage
+      // de la photo en mode "remplissage"
+      const dx = 0
+      const dy = 0
+      const dw = this.width
+      const dh = this.height
+      const ratio = dw / dh
       
+      let sx = 0, sy = 0
+      let sw = this.picture.width
+      let sh = this.picture.height
+      
+      if (this.picture.width < this.picture.height) {
+        sh = sw * (dh / dw)
+        sy = this.picture.height / 2 - sh / 2
+      }
+      else {
+        sw = sh * (dw / dh)
+        sx = this.picture.width / 2 - sw / 2
+      }
+
+      // Photo
+      this.picBufferCtx.clearRect(0, 0, this.width, this.height)
+      this.picBufferCtx.drawImage(this.picture, sx, sy, sw, sh, dx, dy, dw, dh)
+
+      if (this.backgroundColorEnabled) {
+        this.picBufferCtx.save()
+
+        // Réduire le contraste
+        this.picBufferCtx.globalAlpha = 0.3
+        this.picBufferCtx.globalCompositeOperation = 'luminosity'
+        this.picBufferCtx.fillStyle = 'gray'
+        this.picBufferCtx.fillRect(0, 0, this.width, this.height)
+
+        // Colorer la photo
+        this.picBufferCtx.globalAlpha = 1.0
+        this.picBufferCtx.globalCompositeOperation = 'color'
+        this.picBufferCtx.fillStyle = this.backgroundColor
+        this.picBufferCtx.fillRect(0, 0, this.width, this.height)
+        this.picBufferCtx.globalAlpha = 0.3
+        this.picBufferCtx.globalCompositeOperation = 'luminosity'
+        this.picBufferCtx.fillRect(0, 0, this.width, this.height)
+        this.picBufferCtx.restore()
+      }
     }
 
     // Afficher le tout
@@ -224,6 +242,9 @@ export default class Phi {
 
     this.width = this.canvas.width = size
     this.height = this.canvas.height = size
+
+    this.picChanged = true
+    this.phiChanged = true
   }
   
   /**

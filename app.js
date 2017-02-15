@@ -739,18 +739,23 @@ var Phi = function () {
     this.$backgroundColorEnabled = this.$('input[type="checkbox"][name="backgroundColorEnabled"]');
 
     // Écouteurs
-    var elements = [this.$phiColor, this.$phiSize, this.$phiAlpha, this.$phiAlign, this.$phiOperation, this.$backgroundColor, this.$backgroundColorEnabled];
+    var elements = {
+      phi: [this.$phiColor, this.$phiSize, this.$phiAlign],
+      pic: [this.$backgroundColor, this.$backgroundColorEnabled]
+    };
 
     var _iteratorNormalCompletion = true;
     var _didIteratorError = false;
     var _iteratorError = undefined;
 
     try {
-      for (var _iterator = (0, _getIterator3.default)(elements), _step; !(_iteratorNormalCompletion = (_step = _iterator.next()).done); _iteratorNormalCompletion = true) {
+      for (var _iterator = (0, _getIterator3.default)(elements.phi), _step; !(_iteratorNormalCompletion = (_step = _iterator.next()).done); _iteratorNormalCompletion = true) {
         var element = _step.value;
 
-        element.addEventListener('change', this.draw.bind(this));
-      } // Image du phi
+        element.addEventListener('change', function () {
+          return _this.phiChanged = true;
+        });
+      }
     } catch (err) {
       _didIteratorError = true;
       _iteratorError = err;
@@ -762,6 +767,33 @@ var Phi = function () {
       } finally {
         if (_didIteratorError) {
           throw _iteratorError;
+        }
+      }
+    }
+
+    var _iteratorNormalCompletion2 = true;
+    var _didIteratorError2 = false;
+    var _iteratorError2 = undefined;
+
+    try {
+      for (var _iterator2 = (0, _getIterator3.default)(elements.pic), _step2; !(_iteratorNormalCompletion2 = (_step2 = _iterator2.next()).done); _iteratorNormalCompletion2 = true) {
+        var _element = _step2.value;
+
+        _element.addEventListener('change', function () {
+          return _this.picChanged = true;
+        });
+      } // Image du phi
+    } catch (err) {
+      _didIteratorError2 = true;
+      _iteratorError2 = err;
+    } finally {
+      try {
+        if (!_iteratorNormalCompletion2 && _iterator2.return) {
+          _iterator2.return();
+        }
+      } finally {
+        if (_didIteratorError2) {
+          throw _iteratorError2;
         }
       }
     }
@@ -809,72 +841,86 @@ var Phi = function () {
      */
     value: function draw(timestamp) {
 
-      // Calculs nécessaires pour l'affichage
-      // de la photo en mode "remplissage"
-      var dx = 0;
-      var dy = 0;
-      var dw = this.width;
-      var dh = this.height;
-      var ratio = dw / dh;
-
-      var sx = 0,
-          sy = 0;
-      var sw = this.picture.width;
-      var sh = this.picture.height;
-
-      if (this.picture.width < this.picture.height) {
-        sh = sw * (dh / dw);
-        sy = this.picture.height / 2 - sh / 2;
-      } else {
-        sw = sh * (dw / dh);
-        sx = this.picture.width / 2 - sw / 2;
+      if (this.phiSize !== this.cachedPhiSize) {
+        this.phiChanged = true;
+        this.cachedPhiSize = this.phiSize;
       }
 
-      var size = this.phiSize;
-      var align = this.phiAlign;
-      var x = 0,
-          y = 0;
+      if (this.phiChanged) {
+        this.phiChanged = false;
 
-      if (align === 'center') {
-        x = this.width * (1 - size) / 2;
-        y = this.height * (1 - size) / 2;
-      } else {
-        if (align.match(/^bottom-/)) y = this.height * (1 - size);
+        // Taille et position du phi
+        var size = this.phiSize;
+        var align = this.phiAlign;
+        var x = 0,
+            y = 0;
 
-        if (align.match(/-right$/)) x = this.width * (1 - size);
+        if (align === 'center') {
+          x = this.width * (1 - size) / 2;
+          y = this.height * (1 - size) / 2;
+        } else {
+          if (align.match(/^bottom-/)) y = this.height * (1 - size);
+
+          if (align.match(/-right$/)) x = this.width * (1 - size);
+        }
+
+        // Coloration du phi
+        this.phiBufferCtx.save();
+        this.phiBufferCtx.clearRect(0, 0, this.width, this.height);
+        this.phiBufferCtx.drawImage(this.phi, x, y, this.width * size, this.height * size);
+        this.phiBufferCtx.globalCompositeOperation = 'source-in';
+        this.phiBufferCtx.fillStyle = this.phiColor;
+        this.phiBufferCtx.fillRect(0, 0, this.width, this.height);
+        this.phiBufferCtx.restore();
       }
 
-      // Coloration du phi
-      this.phiBufferCtx.save();
-      this.phiBufferCtx.clearRect(0, 0, this.width, this.height);
-      this.phiBufferCtx.drawImage(this.phi, x, y, this.width * size, this.height * size);
-      this.phiBufferCtx.globalCompositeOperation = 'source-in';
-      this.phiBufferCtx.fillStyle = this.phiColor;
-      this.phiBufferCtx.fillRect(0, 0, this.width, this.height);
-      this.phiBufferCtx.restore();
+      if (this.picChanged) {
+        this.picChanged = false;
 
-      // Photo
-      this.picBufferCtx.save();
-      this.picBufferCtx.clearRect(0, 0, this.width, this.height);
-      this.picBufferCtx.drawImage(this.picture, sx, sy, sw, sh, dx, dy, dw, dh);
+        // Calculs nécessaires pour l'affichage
+        // de la photo en mode "remplissage"
+        var dx = 0;
+        var dy = 0;
+        var dw = this.width;
+        var dh = this.height;
+        var ratio = dw / dh;
 
-      if (this.backgroundColorEnabled) {
+        var sx = 0,
+            sy = 0;
+        var sw = this.picture.width;
+        var sh = this.picture.height;
 
-        // Réduire le contraste
-        this.picBufferCtx.globalAlpha = 0.3;
-        this.picBufferCtx.globalCompositeOperation = 'luminosity';
-        this.picBufferCtx.fillStyle = 'gray';
-        this.picBufferCtx.fillRect(0, 0, this.width, this.height);
+        if (this.picture.width < this.picture.height) {
+          sh = sw * (dh / dw);
+          sy = this.picture.height / 2 - sh / 2;
+        } else {
+          sw = sh * (dw / dh);
+          sx = this.picture.width / 2 - sw / 2;
+        }
 
-        // Colorer la photo
-        this.picBufferCtx.globalAlpha = 1.0;
-        this.picBufferCtx.globalCompositeOperation = 'color';
-        this.picBufferCtx.fillStyle = this.backgroundColor;
-        this.picBufferCtx.fillRect(0, 0, this.width, this.height);
-        this.picBufferCtx.globalAlpha = 0.3;
-        this.picBufferCtx.globalCompositeOperation = 'luminosity';
-        this.picBufferCtx.fillRect(0, 0, this.width, this.height);
-        this.picBufferCtx.restore();
+        // Photo
+        this.picBufferCtx.clearRect(0, 0, this.width, this.height);
+        this.picBufferCtx.drawImage(this.picture, sx, sy, sw, sh, dx, dy, dw, dh);
+
+        if (this.backgroundColorEnabled) {
+          this.picBufferCtx.save();
+
+          // Réduire le contraste
+          this.picBufferCtx.globalAlpha = 0.3;
+          this.picBufferCtx.globalCompositeOperation = 'luminosity';
+          this.picBufferCtx.fillStyle = 'gray';
+          this.picBufferCtx.fillRect(0, 0, this.width, this.height);
+
+          // Colorer la photo
+          this.picBufferCtx.globalAlpha = 1.0;
+          this.picBufferCtx.globalCompositeOperation = 'color';
+          this.picBufferCtx.fillStyle = this.backgroundColor;
+          this.picBufferCtx.fillRect(0, 0, this.width, this.height);
+          this.picBufferCtx.globalAlpha = 0.3;
+          this.picBufferCtx.globalCompositeOperation = 'luminosity';
+          this.picBufferCtx.fillRect(0, 0, this.width, this.height);
+          this.picBufferCtx.restore();
+        }
       }
 
       // Afficher le tout
@@ -916,6 +962,9 @@ var Phi = function () {
 
       this.width = this.canvas.width = size;
       this.height = this.canvas.height = size;
+
+      this.picChanged = true;
+      this.phiChanged = true;
     }
 
     /**
@@ -940,13 +989,13 @@ var Phi = function () {
     value: function getNewPicture(files) {
       var _this2 = this;
 
-      var _iteratorNormalCompletion2 = true;
-      var _didIteratorError2 = false;
-      var _iteratorError2 = undefined;
+      var _iteratorNormalCompletion3 = true;
+      var _didIteratorError3 = false;
+      var _iteratorError3 = undefined;
 
       try {
-        for (var _iterator2 = (0, _getIterator3.default)(files), _step2; !(_iteratorNormalCompletion2 = (_step2 = _iterator2.next()).done); _iteratorNormalCompletion2 = true) {
-          var file = _step2.value;
+        for (var _iterator3 = (0, _getIterator3.default)(files), _step3; !(_iteratorNormalCompletion3 = (_step3 = _iterator3.next()).done); _iteratorNormalCompletion3 = true) {
+          var file = _step3.value;
 
           if (file.type.match('image.*')) {
             var reader = new FileReader();
@@ -965,16 +1014,16 @@ var Phi = function () {
           }
         }
       } catch (err) {
-        _didIteratorError2 = true;
-        _iteratorError2 = err;
+        _didIteratorError3 = true;
+        _iteratorError3 = err;
       } finally {
         try {
-          if (!_iteratorNormalCompletion2 && _iterator2.return) {
-            _iterator2.return();
+          if (!_iteratorNormalCompletion3 && _iterator3.return) {
+            _iterator3.return();
           }
         } finally {
-          if (_didIteratorError2) {
-            throw _iteratorError2;
+          if (_didIteratorError3) {
+            throw _iteratorError3;
           }
         }
       }
