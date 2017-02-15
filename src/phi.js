@@ -11,6 +11,29 @@ export default class Phi {
     
     this.picBuffer = document.createElement('canvas')
     this.picBufferCtx = this.picBuffer.getContext('2d')
+
+    // Éléments HTML
+    this.$phiColor = this.$('input[type="color"][name="phi"]')
+    this.$phiSize  = this.$('input[type="range"][name="phiSize"]')
+    this.$phiAlpha = this.$('input[type="range"][name="phiAlpha"]')
+    this.$phiAlign = this.$('select[name="phiAlign"]')
+    this.$phiOperation = this.$('select[name="phiOperation"]')
+    this.$backgroundColor = this.$('input[type="color"][name="background"]')
+    this.$backgroundColorEnabled = this.$('input[type="checkbox"][name="backgroundColorEnabled"]')
+
+    // Écouteurs
+    const elements = [
+      this.$phiColor,
+      this.$phiSize,
+      this.$phiAlpha,
+      this.$phiAlign,
+      this.$phiOperation,
+      this.$backgroundColor,
+      this.$backgroundColorEnabled
+    ]
+
+    for (let element of elements)
+      element.addEventListener('change', this.draw.bind(this))
     
     // Image du phi
     this.phi = new Image
@@ -63,28 +86,33 @@ export default class Phi {
   }
 
   get phiColor () {
-    return this.$('input[type="color"][name="phi"]').value
+    return this.$phiColor.value
   }
   
   get phiAlpha () {
-    return +this.$('input[type="range"][name="phiAlpha"]').value / 100
+    return +this.$phiAlpha.value / 100
   }
   
   get phiSize () {
-    return +this.$('input[type="range"][name="phiSize"]').value / 100
+    return +this.$phiSize.value / 100
   }
   
   get phiAlign () {
-    var select = this.$('select[name="phiAlign"]')
+    const select = this.$phiAlign
+    return select.options[select.selectedIndex].value
+  }
+  
+  get phiOperation () {
+    const select = this.$phiOperation
     return select.options[select.selectedIndex].value
   }
   
   get backgroundColor () {
-    return this.$('input[type="color"][name="background"]').value
+    return this.$backgroundColor.value
   }
   
   get backgroundColorEnabled () {
-    return this.$('input[type="checkbox"][name="backgroundColorEnabled"]').checked
+    return this.$backgroundColorEnabled.checked
   }
   
   /**
@@ -168,6 +196,7 @@ export default class Phi {
     this.ctx.clearRect(0, 0, this.width, this.height)
     this.ctx.drawImage(this.picBuffer, 0, 0, this.width, this.height)
     this.ctx.globalAlpha = this.phiAlpha
+    this.ctx.globalCompositeOperation = this.phiOperation
     this.ctx.drawImage(this.phiBuffer, 0, 0, this.width, this.height)
     this.ctx.restore()
     
