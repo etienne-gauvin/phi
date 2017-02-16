@@ -43,6 +43,8 @@ export default class Phi {
     // Image du phi
     this.phi = new Image
     this.phi.src = './images/phi.svg'
+    this.phiX = 0
+    this.phiY = 0
     
     // Photo par défaut
     this.picture = new Image
@@ -69,6 +71,25 @@ export default class Phi {
     // Sauvegarde de l'image
     this.$('input[name="picture-select"]').addEventListener('change', (event) => {
       this.getNewPicture(event.target.files)
+    })
+
+    // Déplacement du Phi à la main
+    this.canvas.addEventListener('mousedown', (event) => {
+      event.preventDefault()
+      this.movingPhi = true
+      this.phiAlign = 'free'
+    })
+
+    document.body.addEventListener('mousemove', (event) => {
+      if (this.movingPhi) {
+        this.phiX += event.movementX
+        this.phiY += event.movementY
+        this.phiChanged = true
+      }
+    })
+
+    document.body.addEventListener('mouseup', (event) => {
+      this.movingPhi = false
     })
     
     // Calcul de la taille du canvas
@@ -112,6 +133,16 @@ export default class Phi {
     return select.options[select.selectedIndex].value
   }
   
+  set phiAlign (align) {
+    const select = this.$phiAlign
+    for (let i = 0; i < select.options.length; i++) {
+      if (select.options[i].value === align) {
+        select.selectedIndex = i
+        break
+      }
+    }
+  }
+  
   get phiOperation () {
     const select = this.$phiOperation
     return select.options[select.selectedIndex].value
@@ -141,7 +172,7 @@ export default class Phi {
       // Taille et position du phi
       const size = this.phiSize
       const align = this.phiAlign
-      let x = 0, y = 0
+      let x = this.phiX, y = this.phiY
 
       if (align === 'center') {
         x = this.width  * (1 - size) / 2
@@ -154,7 +185,10 @@ export default class Phi {
         if (align.match(/-right$/))
           x = this.width * (1 - size)
       }
-    
+
+      this.phiX = x
+      this.phiY = y
+
       // Coloration du phi
       this.phiBufferCtx.save()
       this.phiBufferCtx.clearRect(0, 0, this.width, this.height)

@@ -800,6 +800,8 @@ var Phi = function () {
 
     this.phi = new Image();
     this.phi.src = './images/phi.svg';
+    this.phiX = 0;
+    this.phiY = 0;
 
     // Photo par défaut
     this.picture = new Image();
@@ -826,6 +828,25 @@ var Phi = function () {
     // Sauvegarde de l'image
     this.$('input[name="picture-select"]').addEventListener('change', function (event) {
       _this.getNewPicture(event.target.files);
+    });
+
+    // Déplacement du Phi à la main
+    this.canvas.addEventListener('mousedown', function (event) {
+      event.preventDefault();
+      _this.movingPhi = true;
+      _this.phiAlign = 'free';
+    });
+
+    document.body.addEventListener('mousemove', function (event) {
+      if (_this.movingPhi) {
+        _this.phiX += event.movementX;
+        _this.phiY += event.movementY;
+        _this.phiChanged = true;
+      }
+    });
+
+    document.body.addEventListener('mouseup', function (event) {
+      _this.movingPhi = false;
     });
 
     // Calcul de la taille du canvas
@@ -857,8 +878,8 @@ var Phi = function () {
         // Taille et position du phi
         var size = this.phiSize;
         var align = this.phiAlign;
-        var x = 0,
-            y = 0;
+        var x = this.phiX,
+            y = this.phiY;
 
         if (align === 'center') {
           x = this.width * (1 - size) / 2;
@@ -868,6 +889,9 @@ var Phi = function () {
 
           if (align.match(/-right$/)) x = this.width * (1 - size);
         }
+
+        this.phiX = x;
+        this.phiY = y;
 
         // Coloration du phi
         this.phiBufferCtx.save();
@@ -1069,6 +1093,15 @@ var Phi = function () {
     get: function get() {
       var select = this.$phiAlign;
       return select.options[select.selectedIndex].value;
+    },
+    set: function set(align) {
+      var select = this.$phiAlign;
+      for (var i = 0; i < select.options.length; i++) {
+        if (select.options[i].value === align) {
+          select.selectedIndex = i;
+          break;
+        }
+      }
     }
   }, {
     key: 'phiOperation',
